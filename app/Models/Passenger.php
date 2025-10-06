@@ -65,4 +65,34 @@ class Passenger extends Model
     {
         return $this->passport_expiry <= now()->addMonths($months);
     }
+
+    /**
+     * Get passenger's upcoming flights
+     */
+    public function getUpcomingFlights()
+    {
+        return $this->bookings()
+            ->with(['flight.airline', 'flight.route'])
+            ->whereHas('flight', function ($query) {
+                $query->where('flight_date', '>=', today())
+                      ->whereIn('status', ['scheduled', 'boarding']);
+            })
+            ->orderBy('flight_date')
+            ->get();
+    }
+
+    /**
+     * Get passenger's flight history
+     */
+    public function getFlightHistory()
+    {
+        return $this->bookings()
+            ->with(['flight.airline', 'flight.route'])
+            ->whereHas('flight', function ($query) {
+                $query->where('flight_date', '<', today())
+                      ->orWhere('status', 'landed');
+            })
+            ->orderBy('flight_date', 'desc')
+            ->get();
+    }
 }
