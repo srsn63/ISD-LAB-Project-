@@ -825,6 +825,42 @@
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(59, 130, 246, 0.7);
         }
+
+        /* Success notification */
+        .success-notification {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            z-index: 1001;
+            animation: slideInRight 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -835,6 +871,13 @@
         <div class="cloud"></div>
         <div class="cloud"></div>
     </div>
+
+    @if(session('success'))
+        <div class="success-notification">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
 
     <nav id="navbar">
         <a href="#" class="logo">
@@ -847,7 +890,21 @@
             <li><a href="#booking">Booking</a></li>
             <li><a href="#status">Status</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="{{ route('login.dashboard') }}" class="login-btn">Login</a></li>
+            @auth
+                <li style="color: var(--sky-blue); font-weight: 600;">
+                    <i class="fas fa-user-circle"></i> {{ Auth::user()->name }}
+                </li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="login-btn" style="background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            @else
+                <li><a href="{{ route('login.dashboard') }}" class="login-btn">Login</a></li>
+            @endauth
         </ul>
         <div class="menu-toggle" id="menuToggle">
             <span></span>

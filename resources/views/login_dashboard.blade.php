@@ -391,6 +391,30 @@
                 font-size: 1.5rem;
             }
         }
+
+        /* Success notification for login page */
+        .success-msg {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -422,6 +446,13 @@
         </div>
 
         <div class="login-card">
+            @if(session('success'))
+                <div class="success-msg">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 

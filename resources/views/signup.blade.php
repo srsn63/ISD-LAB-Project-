@@ -47,6 +47,8 @@
         .back-buttons { display:flex; justify-content:space-between; gap:1rem; margin-top:1.5rem; }
         .back-btn { flex:1; display:inline-flex; justify-content:center; align-items:center; gap:0.4rem; padding:0.75rem 1rem; background:rgba(30,41,59,0.85); border:1px solid rgba(59,130,246,0.35); border-radius:12px; color:var(--text-light); text-decoration:none; font-weight:600; font-size:0.85rem; transition:0.35s; }
         .back-btn:hover { background:rgba(30,41,59,1); border-color:var(--sky-blue); transform:translateY(-3px); box-shadow:0 8px 25px rgba(59,130,246,0.4); }
+        .success-msg { background:linear-gradient(135deg,#10b981,#059669); color:white; padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:10px; animation:slideDown 0.5s ease; }
+        @keyframes slideDown { from { transform:translateY(-20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
     </style>
 </head>
 <body>
@@ -61,29 +63,45 @@
             <div class="subtitle">Join the Lalon Airport platform</div>
         </div>
         <div class="card">
-            <form method="POST" action="#">
+            @if(session('success'))
+                <div class="success-msg">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            
+            <form method="POST" action="{{ route('register') }}">
                 @csrf
                 <div class="form-group">
                     <label for="name">Full Name</label>
                     <div class="input-wrapper">
-                        <input type="text" id="name" name="name" class="input" placeholder="Your full name" required>
+                        <input type="text" id="name" name="name" class="input" placeholder="Your full name" value="{{ old('name') }}" required>
                         <i class="fas fa-user input-icon"></i>
                     </div>
+                    @error('name')
+                        <small style="color: #ff4444; display: block; margin-top: 0.5rem;">{{ $message }}</small>
+                    @enderror
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <div class="input-wrapper">
-                        <input type="email" id="email" name="email" class="input" placeholder="Your email" required>
+                        <input type="email" id="email" name="email" class="input" placeholder="Your email" value="{{ old('email') }}" required>
                         <i class="fas fa-envelope input-icon"></i>
                     </div>
+                    @error('email')
+                        <small style="color: #ff4444; display: block; margin-top: 0.5rem;">{{ $message }}</small>
+                    @enderror
                 </div>
                 <div class="two-col">
                     <div class="form-group" style="flex:1;">
                         <label for="password">Password</label>
                         <div class="input-wrapper">
-                            <input type="password" id="password" name="password" class="input" placeholder="Create password" required>
+                            <input type="password" id="password" name="password" class="input" placeholder="Create password (min 8 chars)" required>
                             <i class="fas fa-lock input-icon"></i>
                         </div>
+                        @error('password')
+                            <small style="color: #ff4444; display: block; margin-top: 0.5rem;">{{ $message }}</small>
+                        @enderror
                     </div>
                     <div class="form-group" style="flex:1;">
                         <label for="password_confirmation">Confirm Password</label>
