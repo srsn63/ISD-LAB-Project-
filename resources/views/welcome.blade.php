@@ -847,7 +847,7 @@
             <li><a href="#booking">Booking</a></li>
             <li><a href="#status">Status</a></li>
             <li><a href="#contact">Contact</a></li>
-            <li><a href="#" class="login-btn">Login</a></li>
+            <li><a href="{{ route('login.dashboard') }}" class="login-btn">Login</a></li>
         </ul>
         <div class="menu-toggle" id="menuToggle">
             <span></span>
