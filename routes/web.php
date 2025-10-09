@@ -1,11 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\FlightController;
 use Illuminate\Http\Request;
+use App\Models\User;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,8 +30,46 @@ Route::get('/signup', function () {
 // Handle signup form submission
 Route::post('/signup', [AuthController::class, 'register'])->name('register');
 
-// Admin dashboard (controller provides users pagination)
-Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+// Admin authentication routes
+Route::get('/admin/login', function () {
+    return view('admin_login');
+})->name('admin.login');
+
+Route::post('/admin/login', function (Request $request) {
+    $data = $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required', 'string'],
+    ]);
+
+    $user = User::where('email', $data['email'])
+        ->where('role', 'admin') // adjust if you use a different admin flag
+        ->first();
+
+    if (!$user || !Hash::check($data['password'], $user->password)) {
+        return back()->withErrors(['email' => 'Invalid admin credentials'])->withInput();
+    }
+
+    $request->session()->put('admin_id', $user->id);
+    $request->session()->regenerate();
+
+    return redirect()->route('admin');
+})->name('admin.login.submit');
+
+Route::post('/admin/logout', function (Request $request) {
+    $request->session()->forget('admin_id');
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect()->route('admin.login');
+})->name('admin.logout');
+
+// Admin dashboard (protected: redirect to admin login if not authenticated)
+Route::get('/admin', function (Request $request) {
+    if (!$request->session()->has('admin_id')) {
+        return redirect()->route('admin.login');
+    }
+    // Delegate to controller to render the dashboard (users list, etc.)
+    return app(AdminController::class)->index($request);
+})->name('admin');
 
 // Users management
 Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
@@ -40,8 +80,34 @@ Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->na
 Route::post('/flights', [FlightController::class, 'store'])->name('flights.store');
 Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
 
-// Minimal booking endpoint to satisfy Book Ticket button; stores nothing yet but flashes a message
+// Minimal booking endpoint with class-based seat decrement and validation
 Route::post('/bookings', function(Request $request){
-    // In a future step, persist a booking and decrement seats.
-    return back()->with('status', 'Booking request received for flight ID '.$request->input('flight_id'));
+    $data = $request->validate([
+        'flight_id' => ['required','integer','exists:admin_flights,id'],
+        'booking_class' => ['required','in:economy,business,first'],
+    ]);
+
+    $updated = \DB::transaction(function() use ($data) {
+        $flight = \App\Models\AdminFlight::lockForUpdate()->find($data['flight_id']);
+        if (!$flight) return false;
+
+        $column = match($data['booking_class']){
+            'first' => 'first_class_seats',
+            'business' => 'business_class_seats',
+            default => 'economy_class_seats',
+        };
+
+        if (($flight->$column ?? 0) <= 0) {
+            return false;
+        }
+
+        $flight->decrement($column);
+        return true;
+    });
+
+    if (!$updated) {
+        return back()->with('status', 'Selected class is sold out. Please choose another class or flight.');
+    }
+
+    return back()->with('status', 'Booking request confirmed. A seat has been reserved in the selected class.');
 })->name('bookings.store');

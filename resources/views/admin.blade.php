@@ -1,3 +1,10 @@
+<?php
+// Simple session gate: redirect to admin login if not authenticated
+if (!session()->has('admin_id')) {
+    header('Location: ' . route('admin.login'));
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,6 +169,10 @@
         </a>
         <div class="top-actions">
             <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="btn alt"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="btn danger"><i class="fas fa-right-from-bracket"></i> Logout</button>
+            </form>
         </div>
     </header>
 
@@ -310,8 +321,8 @@
                             <input type="number" min="0" step="0.01" id="price" name="price" placeholder="e.g., 249.99" required>
                         </div>
                         <div>
-                            <label for="seats">Total Seats</label>
-                            <input type="number" min="1" step="1" id="seats" name="seats" placeholder="e.g., 180" required>
+                            <label for="seats">Total Seats <span class="muted">(minimum 120; First 20, Business 40, Economy = rest)</span></label>
+                            <input type="number" min="120" step="1" id="seats" name="seats" placeholder="e.g., 180" required>
                         </div>
 
                         <div class="full" style="display:flex; gap:10px; justify-content:flex-end; margin-top:.25rem;">

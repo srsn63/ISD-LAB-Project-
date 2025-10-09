@@ -919,29 +919,29 @@
             <p>Experience seamless travel with Lalon Airport. Book flights, check-in online, and track your journey in real-time with our state-of-the-art facilities.</p>
             
             <div class="search-box">
-                <form class="search-form">
+                <form class="search-form" method="GET" action="{{ route('flights.index') }}">
                     <div class="form-group">
                         <label><i class="fas fa-plane-departure"></i> From</label>
-                        <input type="text" placeholder="Departure City" required>
+                        <input type="text" name="origin" placeholder="Departure City" required>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-plane-arrival"></i> To</label>
-                        <input type="text" placeholder="Destination City" required>
+                        <input type="text" name="destination" placeholder="Destination City" required>
                     </div>
                     <div class="form-group">
                         <label><i class="far fa-calendar-alt"></i> Departure Date</label>
-                        <input type="date" required>
+                        <input type="date" name="date" required>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-user-friends"></i> Class</label>
-                        <select>
-                            <option>Economy</option>
-                            <option>Business</option>
-                            <option>First Class</option>
+                        <select name="class">
+                            <option value="economy">Economy</option>
+                            <option value="business">Business</option>
+                            <option value="first">First Class</option>
                         </select>
                     </div>
+                    <button type="submit" class="search-btn"><i class="fas fa-search"></i> Search Flights</button>
                 </form>
-                <button class="search-btn"><i class="fas fa-search"></i> Search Flights</button>
             </div>
         </div>
     </section>

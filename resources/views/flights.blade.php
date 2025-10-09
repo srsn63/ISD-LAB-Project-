@@ -23,6 +23,8 @@
         .pagination{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
         .pagination a,.pagination span{padding:.35rem .6rem;border-radius:8px;border:1px solid rgba(148,163,184,.25);color:#cbd5e1;text-decoration:none}
         .pagination .active{background:#1e40af;border-color:#1e40af}
+        .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:1rem}
+        .filters input,.filters select{padding:.6rem .8rem;border-radius:8px;border:1px solid rgba(148,163,184,.25);background:#0b1224;color:#e2e8f0}
     </style>
 </head>
 <body>
@@ -36,6 +38,19 @@
         <div class="muted">{{ session('status') }}</div>
     @endif
 
+    <form class="filters" method="GET" action="{{ route('flights.index') }}">
+        <input type="text" name="origin" value="{{ request('origin') }}" placeholder="Origin">
+        <input type="text" name="destination" value="{{ request('destination') }}" placeholder="Destination">
+        <input type="date" name="date" value="{{ request('date') }}">
+        <select name="class">
+            <option value="">Any Class</option>
+            <option value="first" {{ request('class')==='first'?'selected':'' }}>First</option>
+            <option value="business" {{ request('class')==='business'?'selected':'' }}>Business</option>
+            <option value="economy" {{ request('class')==='economy'?'selected':'' }}>Economy</option>
+        </select>
+        <button class="btn" type="submit"><i class="fas fa-filter"></i> Filter</button>
+    </form>
+
     <div class="table-wrap">
         <table>
             <thead>
@@ -47,7 +62,9 @@
                     <th>Departure</th>
                     <th>Arrival</th>
                     <th>Status</th>
-                    <th>Seats</th>
+                    <th>First</th>
+                    <th>Business</th>
+                    <th>Economy</th>
                     <th>Price</th>
                     <th>Action</th>
                 </tr>
@@ -62,13 +79,23 @@
                     <td>{{ \Carbon\Carbon::parse($f->departure_at)->format('Y-m-d H:i') }}</td>
                     <td>{{ \Carbon\Carbon::parse($f->arrival_at)->format('Y-m-d H:i') }}</td>
                     <td><span class="tag {{ $f->status }}">{{ ucfirst($f->status) }}</span></td>
-                    <td>{{ $f->seats }}</td>
+                    <td>{{ $f->first_class_seats ?? 0 }}</td>
+                    <td>{{ $f->business_class_seats ?? 0 }}</td>
+                    <td>{{ $f->economy_class_seats ?? 0 }}</td>
                     <td>$ {{ number_format($f->price, 2) }}</td>
                     <td>
-                        @if(in_array($f->status, ['scheduled','delayed']) && $f->seats > 0)
-                            <form method="POST" action="{{ route('bookings.store') }}">
+                        @php
+                            $hasAny = ($f->first_class_seats??0) + ($f->business_class_seats??0) + ($f->economy_class_seats??0) > 0;
+                        @endphp
+                        @if(in_array($f->status, ['scheduled','delayed']) && $hasAny)
+                            <form method="POST" action="{{ route('bookings.store') }}" class="actions" style="display:flex;gap:6px;align-items:center;">
                                 @csrf
                                 <input type="hidden" name="flight_id" value="{{ $f->id }}">
+                                <select name="booking_class" required class="filters" style="margin:0;display:inline-grid;grid-template-columns:1fr;">
+                                    <option value="economy" {{ ($f->economy_class_seats??0) > 0 ? '' : 'disabled' }}>Economy ({{ $f->economy_class_seats ?? 0 }})</option>
+                                    <option value="business" {{ ($f->business_class_seats??0) > 0 ? '' : 'disabled' }}>Business ({{ $f->business_class_seats ?? 0 }})</option>
+                                    <option value="first" {{ ($f->first_class_seats??0) > 0 ? '' : 'disabled' }}>First ({{ $f->first_class_seats ?? 0 }})</option>
+                                </select>
                                 <button type="submit" class="btn-sm"><i class="fas fa-ticket"></i> Book Ticket</button>
                             </form>
                         @else
