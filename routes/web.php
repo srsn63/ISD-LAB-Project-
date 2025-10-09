@@ -85,15 +85,7 @@ Route::get('/admin', function (Request $request) {
     if (!$request->session()->has('admin_id')) {
         return redirect()->route('admin.login');
     }
-    // Delegate to controller and then augment with contact messages
-    $response = app(AdminController::class)->index($request);
-    if ($response instanceof \Illuminate\View\View) {
-        $messages = ContactMessage::latest()->paginate(10);
-        $view = $response->getName();
-        $data = array_merge($response->getData(), compact('messages'));
-        return view($view, $data);
-    }
-    return $response;
+    return app(AdminController::class)->index($request);
 })->name('admin');
 
 // Contact routes

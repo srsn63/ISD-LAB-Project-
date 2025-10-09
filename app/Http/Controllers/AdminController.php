@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -21,6 +22,12 @@ class AdminController extends Controller
             ->limit(50)
             ->get();
 
-        return view('admin', compact('users', 'bookings'));
+        // Recent contact messages for admin visibility
+        $messages = ContactMessage::query()
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get();
+
+        return view('admin', compact('users', 'bookings', 'messages'));
     }
 }

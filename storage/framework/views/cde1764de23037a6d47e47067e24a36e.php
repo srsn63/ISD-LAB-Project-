@@ -42,7 +42,7 @@
         .cloud:nth-child(3){ width:250px;height:250px; bottom:20%; left:50%; animation-delay:6s;}
         .cloud:nth-child(4){ width:180px;height:180px; top:60%; left:10%; animation-delay:9s;}
         .cloud:nth-child(5){ width:220px;height:220px; top:20%; right:20%; animation-delay:12s;}
-        @@keyframes float { 0%,100%{transform:translateY(0) translateX(0);} 50%{transform:translateY(-30px) translateX(30px);} }
+        @keyframes float { 0%,100%{transform:translateY(0) translateX(0);} 50%{transform:translateY(-30px) translateX(30px);} }
 
         /* Layout */
         .container { position: relative; z-index: 2; padding: 7rem 5% 4rem; }
@@ -73,7 +73,7 @@
         .grid {
             display:grid; grid-template-columns: 1.2fr .8fr; gap: 2rem; align-items: start;
         }
-        @@media (max-width: 1100px){ .grid{ grid-template-columns: 1fr; } }
+        @media(max-width: 1100px){ .grid{ grid-template-columns: 1fr; } }
 
         .card {
             background: var(--card-bg); border: 1px solid rgba(59,130,246,0.35);
@@ -161,9 +161,9 @@
             <span>Lalon Airport Admin</span>
         </a>
         <div class="top-actions">
-            <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="btn alt"><i class="fas fa-arrow-left"></i> Back to Home</a>
-            <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
-                @csrf
+            <a href="<?php echo e(Route::has('home') ? route('home') : url('/')); ?>" class="btn alt"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <form method="POST" action="<?php echo e(route('admin.logout')); ?>" style="display:inline;">
+                <?php echo csrf_field(); ?>
                 <button type="submit" class="btn danger"><i class="fas fa-right-from-bracket"></i> Logout</button>
             </form>
         </div>
@@ -204,35 +204,36 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if(isset($users) && count($users) > 0)
-                                @foreach($users as $user)
-                                    <tr data-name="{{ strtolower($user->name) }}" data-email="{{ strtolower($user->email) }}" data-role="{{ $user->role ?? 'user' }}">
-                                        <td>#{{ $user->id }}</td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
+                            <?php if(isset($users) && count($users) > 0): ?>
+                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <tr data-name="<?php echo e(strtolower($user->name)); ?>" data-email="<?php echo e(strtolower($user->email)); ?>" data-role="<?php echo e($user->role ?? 'user'); ?>">
+                                        <td>#<?php echo e($user->id); ?></td>
+                                        <td><?php echo e($user->name); ?></td>
+                                        <td><?php echo e($user->email); ?></td>
                                         <td>
-                                            <span class="tag {{ ($user->role ?? 'user') === 'admin' ? 'admin' : 'user' }}">
-                                                {{ strtoupper($user->role ?? 'user') }}
+                                            <span class="tag <?php echo e(($user->role ?? 'user') === 'admin' ? 'admin' : 'user'); ?>">
+                                                <?php echo e(strtoupper($user->role ?? 'user')); ?>
+
                                             </span>
                                         </td>
-                                        <td>{{ optional($user->created_at)->format('Y-m-d H:i') }}</td>
+                                        <td><?php echo e(optional($user->created_at)->format('Y-m-d H:i')); ?></td>
                                         <td>
                                             <div class="actions">
                                                 <button
                                                     class="icon-btn edit"
                                                     data-action="edit-user"
-                                                    data-id="{{ $user->id }}"
-                                                    data-name="{{ $user->name }}"
-                                                    data-email="{{ $user->email }}"
-                                                    data-role="{{ $user->role ?? 'user' }}"
+                                                    data-id="<?php echo e($user->id); ?>"
+                                                    data-name="<?php echo e($user->name); ?>"
+                                                    data-email="<?php echo e($user->email); ?>"
+                                                    data-role="<?php echo e($user->role ?? 'user'); ?>"
                                                     aria-label="Edit user"
                                                     title="Edit">
                                                     <i class="fas fa-pen"></i>
                                                 </button>
 
-                                                <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirm('Delete this user?')" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                <form method="POST" action="<?php echo e(route('users.destroy', $user->id)); ?>" onsubmit="return confirm('Delete this user?')" style="display:inline;">
+                                                    <?php echo csrf_field(); ?>
+                                                    <?php echo method_field('DELETE'); ?>
                                                     <button type="submit" class="icon-btn delete" aria-label="Delete user" title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -240,32 +241,33 @@
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
-                            @else
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php else: ?>
                                 <tr>
                                     <td colspan="6" style="text-align:center; padding: 1.25rem; color: var(--text-muted);">
                                         <i class="fas fa-circle-info"></i> No users to display. Create a new user to get started.
                                     </td>
                                 </tr>
-                            @endif
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
 
-                @if(isset($users) && method_exists($users, 'links'))
+                <?php if(isset($users) && method_exists($users, 'links')): ?>
                     <div class="spacer"></div>
                     <div>
-                        {{ $users->links() }}
+                        <?php echo e($users->links()); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
             </section>
 
             <!-- Flights: Add New -->
             <section class="card">
                 <h2><i class="fas fa-plane-departure"></i> Add New Flight</h2>
 
-                <form method="POST" action="{{ route('flights.store') }}">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('flights.store')); ?>">
+                    <?php echo csrf_field(); ?>
                     <div class="form-grid">
                         <div class="full">
                             <label for="flight_number">Flight Number</label>
@@ -346,28 +348,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse(($bookings ?? []) as $bk)
+                        <?php $__empty_1 = true; $__currentLoopData = ($bookings ?? []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
-                                <td>#{{ $bk->id }}</td>
+                                <td>#<?php echo e($bk->id); ?></td>
                                 <td>
-                                    @if($bk->flight)
-                                        {{ $bk->flight->flight_number }} ({{ $bk->flight->origin }} → {{ $bk->flight->destination }})
-                                    @else
+                                    <?php if($bk->flight): ?>
+                                        <?php echo e($bk->flight->flight_number); ?> (<?php echo e($bk->flight->origin); ?> → <?php echo e($bk->flight->destination); ?>)
+                                    <?php else: ?>
                                         <span class="muted">N/A</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                <td>{{ $bk->booked_by_email }}</td>
-                                <td>{{ ucfirst($bk->seat_class) }}</td>
-                                <td>{{ $bk->quantity }}</td>
-                                <td>$ {{ number_format($bk->unit_price, 2) }}</td>
-                                <td>$ {{ number_format($bk->total_amount, 2) }}</td>
-                                <td>{{ optional($bk->created_at)->format('Y-m-d H:i') }}</td>
+                                <td><?php echo e($bk->booked_by_email); ?></td>
+                                <td><?php echo e(ucfirst($bk->seat_class)); ?></td>
+                                <td><?php echo e($bk->quantity); ?></td>
+                                <td>$ <?php echo e(number_format($bk->unit_price, 2)); ?></td>
+                                <td>$ <?php echo e(number_format($bk->total_amount, 2)); ?></td>
+                                <td><?php echo e(optional($bk->created_at)->format('Y-m-d H:i')); ?></td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="8" class="muted" style="text-align:center; padding: .9rem;">No bookings yet.</td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -380,8 +382,8 @@
         <div class="modal-card card" role="dialog" aria-modal="true" aria-labelledby="createUserTitle">
             <h2 id="createUserTitle"><i class="fas fa-user-plus"></i> Create User</h2>
             <div class="modal-body">
-                <form id="formCreateUser" method="POST" action="{{ route('users.store') }}">
-                    @csrf
+                <form id="formCreateUser" method="POST" action="<?php echo e(route('users.store')); ?>">
+                    <?php echo csrf_field(); ?>
                     <div class="form-grid">
                         <div class="full">
                             <label for="c_name">Full Name</label>
@@ -417,7 +419,7 @@
         <section class="card" style="margin-top:1.2rem;">
             <h2><i class="fas fa-inbox"></i> Recent Contact Messages</h2>
 
-            @if(isset($messages) && count($messages) > 0)
+            <?php if(isset($messages) && count($messages) > 0): ?>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -432,59 +434,61 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach($messages as $m)
+                        <?php $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ $m->name }}</td>
-                                <td>{{ $m->email }}</td>
-                                <td>{{ $m->subject ?? '-' }}</td>
+                                <td><?php echo e($m->name); ?></td>
+                                <td><?php echo e($m->email); ?></td>
+                                <td><?php echo e($m->subject ?? '-'); ?></td>
                                 <td>
-                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $m->message }}">
-                                        {{ Str::limit($m->message, 80) }}
+                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo e($m->message); ?>">
+                                        <?php echo e(Str::limit($m->message, 80)); ?>
+
                                     </div>
                                 </td>
-                                <td>{{ optional($m->created_at)->format('Y-m-d H:i') }}</td>
+                                <td><?php echo e(optional($m->created_at)->format('Y-m-d H:i')); ?></td>
                                 <td>
-                                    <span class="tag {{ $m->status ?? 'new' }}">{{ ucfirst($m->status ?? 'new') }}</span>
+                                    <span class="tag <?php echo e($m->status ?? 'new'); ?>"><?php echo e(ucfirst($m->status ?? 'new')); ?></span>
                                 </td>
                                 <td>
                                     <button 
                                         class="icon-btn" 
                                         data-action="view-message"
-                                        data-name="{{ $m->name }}"
-                                        data-email="{{ $m->email }}"
-                                        data-subject="{{ $m->subject ?? 'No Subject' }}"
-                                        data-message="{{ htmlspecialchars($m->message) }}"
-                                        data-date="{{ optional($m->created_at)->format('Y-m-d H:i') }}"
+                                        data-name="<?php echo e($m->name); ?>"
+                                        data-email="<?php echo e($m->email); ?>"
+                                        data-subject="<?php echo e($m->subject ?? 'No Subject'); ?>"
+                                        data-message="<?php echo e(htmlspecialchars($m->message)); ?>"
+                                        data-date="<?php echo e(optional($m->created_at)->format('Y-m-d H:i')); ?>"
                                         title="View Full Message">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
 
-                @if(method_exists($messages, 'links'))
+                <?php if(method_exists($messages, 'links')): ?>
                     <div class="spacer"></div>
                     <div>
-                        {{ $messages->onEachSide(1)->links() }}
+                        <?php echo e($messages->onEachSide(1)->links()); ?>
+
                     </div>
-                @endif
-            @else
+                <?php endif; ?>
+            <?php else: ?>
                 <p class="muted"><i class="fas fa-circle-info"></i> No messages yet.</p>
-            @endif
+            <?php endif; ?>
         </section>
     </div>
 
     <!-- Edit User Modal -->
-    <div id="modalEditUser" class="modal" aria-hidden="true" data-update-template="{{ route('users.update', '__ID__') }}">
+    <div id="modalEditUser" class="modal" aria-hidden="true" data-update-template="<?php echo e(route('users.update', '__ID__')); ?>">
         <div class="modal-card card" role="dialog" aria-modal="true" aria-labelledby="editUserTitle">
             <h2 id="editUserTitle"><i class="fas fa-user-pen"></i> Edit User</h2>
             <div class="modal-body">
                 <form id="formEditUser" method="POST" action="#">
-                    @csrf
-                    @method('PUT')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
                     <div class="form-grid">
                         <input type="hidden" id="e_id" name="id">
                         <div class="full">
@@ -647,4 +651,4 @@
         });
     </script>
 </body>
-</html>
+</html><?php /**PATH C:\Users\HP\example-app\resources\views/admin.blade.php ENDPATH**/ ?>
