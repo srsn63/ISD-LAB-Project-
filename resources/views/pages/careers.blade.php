@@ -20,7 +20,9 @@
         .job h3{color:#fff;margin-bottom:6px} .job .meta{font-size:.9rem;color:var(--text-muted)}
         .footer{color:var(--text-muted);text-align:center;margin:28px 0 20px}
     </style>
-    @vite(['resources/css/app.css','resources/js/app.js'])
+    @if (file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css','resources/js/app.js'])
+    @endif
 </head>
 <body>
 <header class="topbar">
