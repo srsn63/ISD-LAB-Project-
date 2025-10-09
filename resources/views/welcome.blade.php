@@ -886,7 +886,7 @@
         </a>
         <ul class="nav-links" id="navLinks">
             <li><a href="#home">Home</a></li>
-            <li><a href="#flights">Flights</a></li>
+            <li><a href="{{ Route::has('flights.index') ? route('flights.index') : url('/flights') }}">Flights</a></li>
             <li><a href="#booking">Booking</a></li>
             <li><a href="#status">Status</a></li>
             <li><a href="#contact">Contact</a></li>

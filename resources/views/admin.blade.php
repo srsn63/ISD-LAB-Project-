@@ -1,4 +1,3 @@
-<?php
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,7 +161,7 @@
             <span>Lalon Airport Admin</span>
         </a>
         <div class="top-actions">
-            <a href="{{ route('home') }}" class="btn alt"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="btn alt"><i class="fas fa-arrow-left"></i> Back to Home</a>
         </div>
     </header>
 
