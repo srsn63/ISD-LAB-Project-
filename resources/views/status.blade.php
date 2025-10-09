@@ -28,7 +28,9 @@
         .code{color:#60a5fa;font-weight:700}
         .status{font-weight:700}
     </style>
+  @if (file_exists(public_path('build/manifest.json')))
     @vite(['resources/css/app.css','resources/js/app.js'])
+  @endif
 </head>
 <body>
 <header class="topbar">
