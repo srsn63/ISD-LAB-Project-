@@ -1190,15 +1190,14 @@
             });
         });
 
-        // Form submission
-        document.querySelector('.search-btn').addEventListener('click', function(e) {
-            e.preventDefault();
-            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-            setTimeout(() => {
-                this.innerHTML = '<i class="fas fa-search"></i> Search Flights';
-                alert('Flight search functionality would be implemented here!');
-            }, 1500);
-        });
+        // Search form: show spinner but allow normal navigation to /flights
+        const searchForm = document.querySelector('.search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function() {
+                const btn = this.querySelector('.search-btn');
+                if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+            });
+        }
 
         document.querySelector('.newsletter-form button').addEventListener('click', function(e) {
             e.preventDefault();

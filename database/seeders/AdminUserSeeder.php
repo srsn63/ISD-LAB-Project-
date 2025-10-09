@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'mail-admin@gmail.com'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Admin',
                 'role' => 'admin', // adjust if your schema uses a different field

@@ -12,7 +12,7 @@ class FlightController extends Controller
     {
         $query = AdminFlight::query();
 
-        // Optional search filters
+        // Optional search filters (case-insensitive contains)
         if ($request->filled('origin')) {
             $query->where('origin', 'like', '%'.$request->string('origin')->trim().'%');
         }
@@ -21,18 +21,7 @@ class FlightController extends Controller
         }
         if ($request->filled('date')) {
             // Filter by date part of departure_at
-            $query->whereDate('departure_at', $request->date('date'));
-        }
-        if ($request->filled('class')) {
-            $class = $request->input('class');
-            if (in_array($class, ['first','business','economy'])) {
-                $column = match($class) {
-                    'first' => 'first_class_seats',
-                    'business' => 'business_class_seats',
-                    default => 'economy_class_seats',
-                };
-                $query->where($column, '>', 0);
-            }
+            $query->whereDate('departure_at', $request->input('date'));
         }
 
         $flights = $query->orderBy('departure_at')->paginate(10)->appends($request->query());
@@ -51,22 +40,10 @@ class FlightController extends Controller
             'departure_at' => ['required','date'],
             'arrival_at' => ['required','date','after:departure_at'],
             'price' => ['required','numeric','min:0'],
-            'seats' => ['required','integer','min:120'], // enforce minimum seats
+            'seats' => ['required','integer','min:1'],
         ]);
 
-        // Distribute seats: First=20, Business=40, Economy=rest
-        $total = (int) $validated['seats'];
-        $first = 20;
-        $business = 40;
-        $economy = max($total - ($first + $business), 0);
-
-        $data = array_merge($validated, [
-            'first_class_seats' => $first,
-            'business_class_seats' => $business,
-            'economy_class_seats' => $economy,
-        ]);
-
-        AdminFlight::create($data);
+        AdminFlight::create($validated);
 
         return back()->with('status', 'Flight created successfully.');
     }

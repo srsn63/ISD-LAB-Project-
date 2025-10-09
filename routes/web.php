@@ -80,34 +80,23 @@ Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->na
 Route::post('/flights', [FlightController::class, 'store'])->name('flights.store');
 Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
 
-// Minimal booking endpoint with class-based seat decrement and validation
+// Booking endpoint: decrement total seats if available
 Route::post('/bookings', function(Request $request){
     $data = $request->validate([
         'flight_id' => ['required','integer','exists:admin_flights,id'],
-        'booking_class' => ['required','in:economy,business,first'],
     ]);
 
     $updated = \DB::transaction(function() use ($data) {
         $flight = \App\Models\AdminFlight::lockForUpdate()->find($data['flight_id']);
         if (!$flight) return false;
-
-        $column = match($data['booking_class']){
-            'first' => 'first_class_seats',
-            'business' => 'business_class_seats',
-            default => 'economy_class_seats',
-        };
-
-        if (($flight->$column ?? 0) <= 0) {
-            return false;
-        }
-
-        $flight->decrement($column);
+        if ((int)$flight->seats <= 0) return false;
+        $flight->decrement('seats');
         return true;
     });
 
     if (!$updated) {
-        return back()->with('status', 'Selected class is sold out. Please choose another class or flight.');
+        return back()->with('status', 'This flight is sold out.');
     }
 
-    return back()->with('status', 'Booking request confirmed. A seat has been reserved in the selected class.');
+    return back()->with('status', 'Booking confirmed. A seat has been reserved.');
 })->name('bookings.store');
