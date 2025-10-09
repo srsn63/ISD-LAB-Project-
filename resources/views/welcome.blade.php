@@ -888,7 +888,7 @@
             <li><a href="#home">Home</a></li>
             <li><a href="{{ Route::has('flights.index') ? route('flights.index') : url('/flights') }}">Flights</a></li>
             <li><a href="{{ Route::has('flights.index') ? route('flights.index') : url('/flights') }}">Booking</a></li>
-            <li><a href="#status">Status</a></li>
+            <li><a href="{{ route('status') }}">Status</a></li>
             <li><a href="#contact">Contact</a></li>
             @auth
                 <li style="color: var(--sky-blue); font-weight: 600;">
@@ -1041,6 +1041,7 @@
             </div>
         </div>
     </section>
+  
 
     <section class="newsletter">
         <div class="newsletter-content">

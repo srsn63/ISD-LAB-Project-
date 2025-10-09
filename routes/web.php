@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\FlightController;
+use App\Http\Controllers\StatusController;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -18,6 +19,9 @@ Route::view('/about', 'pages.about')->name('about');
 Route::view('/careers', 'pages.careers')->name('careers');
 Route::view('/news', 'pages.news')->name('news');
 Route::view('/investor-relations', 'pages.investor')->name('investor');
+
+// Status page
+Route::get('/status', [StatusController::class, 'index'])->name('status');
 
 Route::get('/login', function () {
     return view('login_dashboard');
