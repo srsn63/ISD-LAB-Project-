@@ -889,7 +889,7 @@
             <li><a href="{{ Route::has('flights.index') ? route('flights.index') : url('/flights') }}">Flights</a></li>
             <li><a href="{{ Route::has('flights.index') ? route('flights.index') : url('/flights') }}">Booking</a></li>
             <li><a href="{{ route('status') }}">Status</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li><a href="{{ route('contact') }}">Contact</a></li>
             @auth
                 <li style="color: var(--sky-blue); font-weight: 600;">
                     <i class="fas fa-user-circle"></i> {{ Auth::user()->name }}
