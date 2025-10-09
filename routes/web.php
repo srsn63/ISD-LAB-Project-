@@ -13,6 +13,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Static pages from footer quick links
+Route::view('/about', 'pages.about')->name('about');
+Route::view('/careers', 'pages.careers')->name('careers');
+Route::view('/news', 'pages.news')->name('news');
+Route::view('/investor-relations', 'pages.investor')->name('investor');
+
 Route::get('/login', function () {
     return view('login_dashboard');
 })->name('login.dashboard');

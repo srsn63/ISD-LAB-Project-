@@ -1061,10 +1061,10 @@
             </div>
             <div class="footer-section">
                 <h3>Quick Links</h3>
-                <a href="#">About Us</a>
-                <a href="#">Careers</a>
-                <a href="#">News & Media</a>
-                <a href="#">Investor Relations</a>
+                <a href="{{ route('about') }}">About Us</a>
+                <a href="{{ route('careers') }}">Careers</a>
+                <a href="{{ route('news') }}">News & Media</a>
+                <a href="{{ route('investor') }}">Investor Relations</a>
             </div>
             <div class="footer-section">
                 <h3>Services</h3>
