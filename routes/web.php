@@ -7,8 +7,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ContactMessage;
 
 Route::get('/', function () {
     return view('welcome');
@@ -77,9 +79,20 @@ Route::get('/admin', function (Request $request) {
     if (!$request->session()->has('admin_id')) {
         return redirect()->route('admin.login');
     }
-    // Delegate to controller to render the dashboard (users list, etc.)
-    return app(AdminController::class)->index($request);
+    // Delegate to controller and then augment with contact messages
+    $response = app(AdminController::class)->index($request);
+    if ($response instanceof \Illuminate\View\View) {
+        $messages = ContactMessage::latest()->paginate(10);
+        $view = $response->getName();
+        $data = array_merge($response->getData(), compact('messages'));
+        return view($view, $data);
+    }
+    return $response;
 })->name('admin');
+
+// Contact routes
+Route::get('/contact', [ContactController::class, 'create'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Users management
 Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');

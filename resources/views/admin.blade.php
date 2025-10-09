@@ -424,6 +424,52 @@ if (!session()->has('admin_id')) {
         </div>
     </div>
 
+    <div class="container" style="padding-top:0;">
+        <!-- Contact Messages -->
+        <section class="card" style="margin-top:1.2rem;">
+            <h2><i class="fas fa-inbox"></i> Recent Contact Messages</h2>
+
+            @php $hasMessages = isset($messages) && count($messages) > 0; @endphp
+            @if($hasMessages)
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>From</th>
+                                <th>Email</th>
+                                <th>Subject</th>
+                                <th>Received</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($messages as $m)
+                            <tr>
+                                <td>{{ $m->name }}</td>
+                                <td>{{ $m->email }}</td>
+                                <td>{{ $m->subject ?? '-' }}</td>
+                                <td>{{ optional($m->created_at)->format('Y-m-d H:i') }}</td>
+                                <td>
+                                    <span class="tag {{ $m->status ?? 'new' }}">{{ ucfirst($m->status ?? 'new') }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @if(method_exists($messages, 'links'))
+                    <div class="spacer"></div>
+                    <div>
+                        {{ $messages->onEachSide(1)->links() }}
+                    </div>
+                @endif
+            @else
+                <p class="muted"><i class="fas fa-circle-info"></i> No messages yet.</p>
+            @endif
+        </section>
+    </div>
+
     <!-- Edit User Modal -->
     <div id="modalEditUser" class="modal" aria-hidden="true" data-update-template="{{ route('users.update', '__ID__') }}">
         <div class="modal-card card" role="dialog" aria-modal="true" aria-labelledby="editUserTitle">
