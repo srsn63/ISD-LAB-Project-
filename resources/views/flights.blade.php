@@ -19,7 +19,8 @@
         .tag.departed{background:rgba(34,197,94,.15);color:#86efac}
         .tag.cancelled{background:rgba(239,68,68,.15);color:#fecaca}
         .actions .btn-sm{padding:.4rem .7rem;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:8px;color:#fff;cursor:pointer}
-        .muted{color:#94a3b8;font-size:.9rem;margin-top:1rem}
+    .muted{color:#94a3b8;font-size:.9rem;margin-top:1rem}
+    .toast{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:1000;box-shadow:0 10px 30px rgba(0,0,0,.35);display:none}
         .pagination{display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem}
         .pagination a,.pagination span{padding:.35rem .6rem;border-radius:8px;border:1px solid rgba(148,163,184,.25);color:#cbd5e1;text-decoration:none}
         .pagination .active{background:#1e40af;border-color:#1e40af}
@@ -34,8 +35,14 @@
         <a href="{{ Route::has('home') ? route('home') : url('/') }}" class="btn"><i class="fas fa-home"></i> Home</a>
     </header>
 
+    <div id="toast" class="toast">{{ session('status') }}</div>
     @if(session('status'))
-        <div class="muted">{{ session('status') }}</div>
+        <script>
+            window.addEventListener('DOMContentLoaded', function(){
+                const t = document.getElementById('toast');
+                if(t){ t.style.display='block'; setTimeout(()=>{ t.style.display='none'; }, 2500); }
+            });
+        </script>
     @endif
 
     <form class="filters" method="GET" action="{{ route('flights.index') }}">
@@ -77,10 +84,16 @@
                     <td>$ {{ number_format($f->price, 2) }}</td>
                     <td>
                         @if(in_array($f->status, ['scheduled','delayed']) && (int)$f->seats > 0)
-                            <form method="POST" action="{{ route('bookings.store') }}" class="actions" style="display:flex;gap:6px;align-items:center;">
+                            <form method="POST" action="{{ route('bookings.store') }}" class="actions" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
                                 @csrf
                                 <input type="hidden" name="flight_id" value="{{ $f->id }}">
-                                <button type="submit" class="btn-sm"><i class="fas fa-ticket"></i> Book Ticket</button>
+                                <select name="seat_class" required style="padding:.4rem .5rem;border-radius:8px;border:1px solid rgba(148,163,184,.25);background:#0b1224;color:#e2e8f0">
+                                    <option value="economy">Economy</option>
+                                    <option value="business">Business</option>
+                                    <option value="first">First</option>
+                                </select>
+                                <input name="quantity" type="number" min="1" max="{{ max(1,(int)$f->seats) }}" value="1" style="width:80px;padding:.4rem .5rem;border-radius:8px;border:1px solid rgba(148,163,184,.25);background:#0b1224;color:#e2e8f0">
+                                <button type="submit" class="btn-sm"><i class="fas fa-ticket"></i> Book</button>
                             </form>
                         @else
                             <span class="muted">N/A</span>

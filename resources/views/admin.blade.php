@@ -337,6 +337,54 @@ if (!session()->has('admin_id')) {
                 </p>
             </section>
         </div>
+
+        <div class="spacer"></div>
+        <!-- Recent Bookings -->
+        <section class="card">
+            <h2><i class="fas fa-ticket"></i> Recent Ticket Bookings</h2>
+            <div class="table-wrap" style="margin-top: .6rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:90px">ID</th>
+                            <th>Flight</th>
+                            <th>Booked By</th>
+                            <th>Class</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                            <th>When</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse(($bookings ?? []) as $bk)
+                            <tr>
+                                <td>#{{ $bk->id }}</td>
+                                <td>
+                                    @php($fl = $bk->flight)
+                                    @if($fl)
+                                        {{ $fl->flight_number }} ({{ $fl->origin }} → {{ $fl->destination }})
+                                    @else
+                                        <span class="muted">N/A</span>
+                                    @endif
+                                </td>
+                                <td>{{ $bk->booked_by_email }}</td>
+                                <td>{{ ucfirst($bk->seat_class) }}</td>
+                                <td>{{ $bk->quantity }}</td>
+                                <td>$ {{ number_format($bk->unit_price, 2) }}</td>
+                                <td>$ {{ number_format($bk->total_amount, 2) }}</td>
+                                <td>{{ optional($bk->created_at)->format('Y-m-d H:i') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="muted" style="text-align:center; padding: .9rem;">No bookings yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <p class="muted" style="margin-top:.5rem;">This list shows the 50 most recent ticket bookings. For detailed reports, we can add filters and exports next.</p>
+        </section>
     </div>
 
     <!-- Create User Modal -->

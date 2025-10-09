@@ -24,6 +24,14 @@ class FlightController extends Controller
             $query->whereDate('departure_at', $request->input('date'));
         }
 
+        // Optional price range filters
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', (float) $request->input('min_price'));
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', (float) $request->input('max_price'));
+        }
+
         $flights = $query->orderBy('departure_at')->paginate(10)->appends($request->query());
 
         return view('flights', compact('flights'));

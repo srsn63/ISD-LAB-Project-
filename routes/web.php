@@ -80,23 +80,56 @@ Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->na
 Route::post('/flights', [FlightController::class, 'store'])->name('flights.store');
 Route::get('/flights', [FlightController::class, 'index'])->name('flights.index');
 
-// Booking endpoint: decrement total seats if available
+// Booking endpoint: decrement seats by quantity, capture seat class, and record the booking summary
 Route::post('/bookings', function(Request $request){
     $data = $request->validate([
         'flight_id' => ['required','integer','exists:admin_flights,id'],
+        'seat_class' => ['required','in:economy,business,first'],
+        'quantity' => ['required','integer','min:1','max:20'],
     ]);
 
-    $updated = \DB::transaction(function() use ($data) {
+    $user = auth()->user();
+    $bookedBy = $user?->email ?? $request->input('email', 'guest@example.com');
+
+    $result = \DB::transaction(function() use ($data, $user, $bookedBy) {
+        /** @var \App\Models\AdminFlight|null $flight */
         $flight = \App\Models\AdminFlight::lockForUpdate()->find($data['flight_id']);
-        if (!$flight) return false;
-        if ((int)$flight->seats <= 0) return false;
-        $flight->decrement('seats');
-        return true;
+        if (!$flight) return ['ok' => false, 'msg' => 'Flight not found.'];
+
+        if (!in_array($flight->status, ['scheduled','delayed'])) {
+            return ['ok' => false, 'msg' => 'This flight is not open for booking.'];
+        }
+
+        $qty = (int)$data['quantity'];
+        if ((int)$flight->seats < $qty) {
+            return ['ok' => false, 'msg' => 'Not enough seats available.'];
+        }
+
+        // Decrement seats by quantity
+        $flight->decrement('seats', $qty);
+
+        // Price multiplier by class (simple logic; can be adjusted later)
+        $mult = match($data['seat_class']) {
+            'business' => 1.6,
+            'first' => 2.2,
+            default => 1.0,
+        };
+        $unitPrice = round(((float)$flight->price) * $mult, 2);
+        $total = round($unitPrice * $qty, 2);
+
+        // Persist a compact booking record for admin visibility
+        \App\Models\TicketBooking::create([
+            'admin_flight_id' => $flight->id,
+            'user_id' => $user?->id,
+            'booked_by_email' => $bookedBy,
+            'seat_class' => $data['seat_class'],
+            'quantity' => $qty,
+            'unit_price' => $unitPrice,
+            'total_amount' => $total,
+        ]);
+
+        return ['ok' => true, 'msg' => "Booked {$qty} {$data['seat_class']} ticket(s) successfully."];
     });
 
-    if (!$updated) {
-        return back()->with('status', 'This flight is sold out.');
-    }
-
-    return back()->with('status', 'Booking confirmed. A seat has been reserved.');
+    return back()->with('status', $result['msg']);
 })->name('bookings.store');

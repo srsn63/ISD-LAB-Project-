@@ -14,6 +14,13 @@ class AdminController extends Controller
             ->orderByDesc('id')
             ->paginate(10);
 
-        return view('admin', compact('users'));
+        // Lightweight bookings summary for visibility
+        $bookings = \App\Models\TicketBooking::query()
+            ->with('flight')
+            ->orderByDesc('id')
+            ->limit(50)
+            ->get();
+
+        return view('admin', compact('users', 'bookings'));
     }
 }
