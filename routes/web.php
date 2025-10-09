@@ -23,6 +23,12 @@ Route::view('/investor-relations', 'pages.investor')->name('investor');
 // Status page
 Route::get('/status', [StatusController::class, 'index'])->name('status');
 
+// Service pages
+Route::view('/services/flight-booking', 'services.flight_booking')->name('services.flight_booking');
+Route::view('/services/online-checkin', 'services.online_checkin')->name('services.online_checkin');
+Route::view('/services/baggage-services', 'services.baggage_services')->name('services.baggage_services');
+Route::view('/services/lounges', 'services.lounges')->name('services.lounges');
+
 Route::get('/login', function () {
     return view('login_dashboard');
 })->name('login.dashboard');

@@ -1069,10 +1069,10 @@
             </div>
             <div class="footer-section">
                 <h3>Services</h3>
-                <a href="#">Flight Booking</a>
-                <a href="#">Online Check-in</a>
-                <a href="#">Baggage Services</a>
-                <a href="#">Lounges</a>
+                <a href="{{ route('services.flight_booking') }}">Flight Booking</a>
+                <a href="{{ route('services.online_checkin') }}">Online Check-in</a>
+                <a href="{{ route('services.baggage_services') }}">Baggage Services</a>
+                <a href="{{ route('services.lounges') }}">Lounges</a>
             </div>
             <div class="footer-section">
                 <h3>Contact</h3>
