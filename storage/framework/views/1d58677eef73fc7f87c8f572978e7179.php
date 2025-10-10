@@ -967,11 +967,11 @@
                 <h3>Flight Status</h3>
                 <p>Track real-time flight information, gate updates and arrival times</p>
             </a>
-            <div class="action-card">
+            <a href="<?php echo e(route('baggage_track')); ?>" class="action-card" style="text-decoration:none;color:inherit">
                 <div class="action-icon"><i class="fas fa-suitcase-rolling"></i></div>
                 <h3>Baggage Track</h3>
                 <p>Monitor your baggage location throughout your journey with our tracking system</p>
-            </div>
+            </a>
         </div>
     </section>
 

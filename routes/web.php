@@ -9,6 +9,7 @@ use App\Http\Controllers\FlightController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\BaggageController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
@@ -20,8 +21,8 @@ Route::get('/', function () {
 
 // Flight Status page (dummy data, themed)
 Route::view('/flight-status', 'flight_status')->name('flight_status');
-// Baggage Track page (dummy data, themed)
-Route::view('/baggage-track', 'baggage_track')->name('baggage_track');
+// Baggage Track page (live search by tag or email)
+Route::get('/baggage-track', [BaggageController::class, 'index'])->name('baggage_track');
 
 // Static pages from footer quick links
 Route::view('/about', 'pages.about')->name('about');
@@ -325,3 +326,148 @@ Route::get('/dev/seed-checkin-demo', function () {
         'checkin_url' => route('checkin.create', ['terminal' => 2]),
     ]);
 })->name('dev.seed_checkin_demo');
+
+// Dev: seed baggage and tracking records for demo booking
+Route::get('/dev/seed-baggage-demo', function () {
+    if (!app()->environment(['local', 'development'])) {
+        abort(403, 'Forbidden');
+    }
+
+    $email = 'demo.checkin@example.com';
+    $booking = \App\Models\Booking::where('booked_by_email', $email)
+        ->latest('id')->first();
+    if (!$booking) {
+        return response()->json(['ok' => false, 'message' => 'Run /dev/seed-checkin-demo first to create a booking.'], 400);
+    }
+
+    $bag = \App\Models\Baggage::firstOrCreate(
+        [
+            'booking_id' => $booking->id,
+            'baggage_tag' => 'LA-'.substr(strtoupper(bin2hex(random_bytes(4))), 0, 6),
+        ],
+        [
+            'weight_kg' => 18.5,
+            'baggage_type' => 'checked',
+            'special_handling' => null,
+            'current_location' => 'Sorting Area',
+            'status' => 'in_transit',
+        ]
+    );
+
+    // Add tracking events
+    $now = now();
+    \App\Models\BaggageTracking::updateOrCreate(
+        ['baggage_id' => $bag->id, 'scan_time' => $now->copy()->subMinutes(30)],
+        ['location' => 'Check-in Counter', 'status' => 'checked_in', 'notes' => 'Bag accepted']
+    );
+    \App\Models\BaggageTracking::updateOrCreate(
+        ['baggage_id' => $bag->id, 'scan_time' => $now->copy()->subMinutes(20)],
+        ['location' => 'Security Screening', 'status' => 'screened', 'notes' => 'Cleared']
+    );
+    \App\Models\BaggageTracking::updateOrCreate(
+        ['baggage_id' => $bag->id, 'scan_time' => $now->copy()->subMinutes(10)],
+        ['location' => 'Sorting Area', 'status' => 'in_transit', 'notes' => 'To Belt']
+    );
+
+    return response()->json([
+        'ok' => true,
+        'message' => 'Baggage and tracking events seeded for demo booking.',
+        'baggage_tag' => $bag->baggage_tag,
+        'track_url' => route('baggage_track', ['tag' => $bag->baggage_tag]),
+    ]);
+})->name('dev.seed_baggage_demo');
+
+// Dev: seed a landed flight with belts to show arrivals section and flight-number search
+Route::get('/dev/seed-arrivals-demo', function () {
+    if (!app()->environment(['local', 'development'])) {
+        abort(403, 'Forbidden');
+    }
+
+    // Ensure airports/airline/route/aircraft via existing checkin seeder
+    $seedCheckin = route('dev.seed_checkin_demo');
+
+    $airline = \App\Models\Airline::firstOrCreate(['name' => 'Lalon Air'], [
+        'airline_code' => 'LA', 'icao_code' => 'LAL', 'country' => 'Bangladesh',
+        'headquarters' => 'Dhaka', 'website' => 'https://lalonair.example',
+        'active' => true, 'contact_info' => 'info@lalonair.example',
+    ]);
+    $ac = \App\Models\Aircraft::firstOrCreate(['registration_number' => 'S2-A101'], [
+        'aircraft_type' => 'A320', 'model' => 'A320-200', 'airline_id' => $airline->id,
+        'total_seats' => 180, 'first_class_seats' => 12, 'business_class_seats' => 24,
+        'economy_class_seats' => 144, 'manufacturer' => 'Airbus', 'manufacturing_year' => 2019,
+        'status' => 'active', 'last_maintenance_date' => now()->subMonths(2), 'next_maintenance_date' => now()->addMonths(4),
+    ]);
+    $from = \App\Models\Airport::firstOrCreate(['iata_code' => 'CGP'], [
+        'icao_code' => 'VGEG','name' => 'Shah Amanat Intl','city' => 'Chattogram','country' => 'Bangladesh','timezone' => 'Asia/Dhaka',
+        'latitude' => 22.2496,'longitude' => 91.8133,'elevation_feet' => 12,'total_terminals' => 1,'total_runways' => 1,'international' => true,'active' => true,
+    ]);
+    $to = \App\Models\Airport::firstOrCreate(['iata_code' => 'DAC'], [
+        'icao_code' => 'VGHS','name' => 'Hazrat Shahjalal Intl','city' => 'Dhaka','country' => 'Bangladesh','timezone' => 'Asia/Dhaka',
+        'latitude' => 23.8433,'longitude' => 90.3978,'elevation_feet' => 30,'total_terminals' => 3,'total_runways' => 2,'international' => true,'active' => true,
+    ]);
+    $route = \App\Models\Route::firstOrCreate([
+        'origin_airport_id' => $from->id,
+        'destination_airport_id' => $to->id,
+    ], [
+        'distance_km' => 220, 'estimated_duration_minutes' => 45, 'active' => true,
+    ]);
+
+    $flight = \App\Models\Flight::updateOrCreate([
+        'flight_number' => 'LA220', 'flight_date' => today(),
+    ], [
+        'airline_id' => $airline->id, 'aircraft_id' => $ac->id, 'route_id' => $route->id,
+        'scheduled_departure' => '09:00', 'scheduled_arrival' => '09:50',
+        'actual_departure' => '09:10', 'actual_arrival' => '10:05',
+        'status' => 'landed', 'departure_gate' => 'C1', 'arrival_gate' => 'Belt A',
+        'available_seats' => 10, 'base_price' => 200.00,
+    ]);
+
+    // Create a couple of bags on belts
+    $pax = \App\Models\Passenger::firstOrCreate(['email' => 'belt.demo1@example.com'], [
+        'first_name' => 'Belt', 'last_name' => 'Demo1', 'phone' => '+8801000000001',
+        'date_of_birth' => '1990-02-02', 'gender' => 'male', 'nationality' => 'Bangladeshi',
+        'passport_number' => 'P00000001', 'passport_expiry' => now()->addYears(5)->toDateString(),
+        'emergency_contact_name' => 'E1', 'emergency_contact_phone' => '+8801111111111',
+        'meal_preference' => 'regular', 'seat_preference' => 'aisle', 'frequent_flyer' => false,
+    ]);
+    $booking = \App\Models\Booking::firstOrCreate([
+        'passenger_id' => $pax->id, 'flight_id' => $flight->id, 'booked_by_email' => 'belt.demo1@example.com'
+    ], [
+        'booking_reference' => 'BELT01', 'booking_status' => 'confirmed', 'booking_date' => now(),
+        'booking_class' => 'economy', 'total_amount' => 200.00, 'payment_status' => 'completed', 'payment_method' => 'card', 'travel_insurance' => false,
+    ]);
+    $beltBag1 = \App\Models\Baggage::updateOrCreate([
+        'booking_id' => $booking->id, 'baggage_tag' => 'LA-BELT01'
+    ], [
+        'weight_kg' => 20.0, 'baggage_type' => 'checked', 'current_location' => 'Belt A', 'status' => 'on_belt'
+    ]);
+
+    $pax2 = \App\Models\Passenger::firstOrCreate(['email' => 'belt.demo2@example.com'], [
+        'first_name' => 'Belt', 'last_name' => 'Demo2', 'phone' => '+8801000000002',
+        'date_of_birth' => '1988-03-03', 'gender' => 'female', 'nationality' => 'Bangladeshi',
+        'passport_number' => 'P00000002', 'passport_expiry' => now()->addYears(5)->toDateString(),
+        'emergency_contact_name' => 'E2', 'emergency_contact_phone' => '+8801222222222',
+        'meal_preference' => 'regular', 'seat_preference' => 'window', 'frequent_flyer' => false,
+    ]);
+    $booking2 = \App\Models\Booking::firstOrCreate([
+        'passenger_id' => $pax2->id, 'flight_id' => $flight->id, 'booked_by_email' => 'belt.demo2@example.com'
+    ], [
+        'booking_reference' => 'BELT02', 'booking_status' => 'confirmed', 'booking_date' => now(),
+        'booking_class' => 'economy', 'total_amount' => 200.00, 'payment_status' => 'completed', 'payment_method' => 'card', 'travel_insurance' => false,
+    ]);
+    $beltBag2 = \App\Models\Baggage::updateOrCreate([
+        'booking_id' => $booking2->id, 'baggage_tag' => 'LA-BELT02'
+    ], [
+        'weight_kg' => 19.2, 'baggage_type' => 'checked', 'current_location' => 'Belt B', 'status' => 'on_belt'
+    ]);
+
+    return response()->json([
+        'ok' => true,
+        'message' => 'Arrivals demo seeded with landed flight LA220 and belts A/B.',
+        'flight' => 'LA220',
+        'belts' => ['Belt A', 'Belt B'],
+        'try' => [
+            'search_flight_url' => route('baggage_track', ['flight' => 'LA220']),
+        ],
+    ]);
+})->name('dev.seed_arrivals_demo');

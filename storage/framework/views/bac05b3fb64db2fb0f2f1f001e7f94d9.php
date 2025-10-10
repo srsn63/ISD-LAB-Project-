@@ -15,7 +15,7 @@
         .cloud:nth-child(1){width:300px;height:300px;top:10%;left:-150px}
         .cloud:nth-child(2){width:200px;height:200px;top:40%;right:-100px;animation-delay:3s}
         .cloud:nth-child(3){width:250px;height:250px;bottom:20%;left:50%;animation-delay:6s}
-    @@keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-30px) translateX(30px)}}
+    @keyframes float{0%,100%{transform:translateY(0) translateX(0)}50%{transform:translateY(-30px) translateX(30px)}}
         /* Top bar */
         .topbar{position:sticky;top:0;z-index:10;background:rgba(15,23,42,.95);backdrop-filter:blur(15px);padding:14px 6vw;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(59,130,246,.2);box-shadow:0 4px 30px rgba(0,0,0,.3)}
         .brand{display:flex;align-items:center;gap:10px;color:var(--sky-blue);font-weight:800;text-decoration:none}
@@ -47,8 +47,8 @@
         <div class="cloud"></div>
     </div>
     <header class="topbar">
-        <a class="brand" href="{{ route('home') }}"><i class="fa-solid fa-plane"></i> Lalon Airport</a>
-        <a class="back-btn" href="{{ route('home') }}"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        <a class="brand" href="<?php echo e(route('home')); ?>"><i class="fa-solid fa-plane"></i> Lalon Airport</a>
+        <a class="back-btn" href="<?php echo e(route('home')); ?>"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
     </header>
 
     <main class="container">
@@ -56,32 +56,33 @@
         <section class="card">
             <p class="hint"><i class="fa-solid fa-circle-info"></i> Search by Baggage Tag (e.g., LA-784512) or Booking Email (e.g., demo.checkin@example.com) to view status and scan history.</p>
 
-            <form method="GET" action="{{ route('baggage_track') }}" class="filter" style="margin-bottom:14px">
-                <input name="flight" value="{{ request('flight') }}" type="text" placeholder="Flight Number (e.g., LA102)" style="min-width:220px">
-                <input name="tag" value="{{ request('tag') }}" type="text" placeholder="Optional: Baggage Tag (e.g., LA-784512)">
-                <input name="email" value="{{ request('email') }}" type="email" placeholder="Optional: Booking Email (e.g., you@example.com)">
+            <form method="GET" action="<?php echo e(route('baggage_track')); ?>" class="filter" style="margin-bottom:14px">
+                <input name="flight" value="<?php echo e(request('flight')); ?>" type="text" placeholder="Flight Number (e.g., LA102)" style="min-width:220px">
+                <input name="tag" value="<?php echo e(request('tag')); ?>" type="text" placeholder="Optional: Baggage Tag (e.g., LA-784512)">
+                <input name="email" value="<?php echo e(request('email')); ?>" type="email" placeholder="Optional: Booking Email (e.g., you@example.com)">
                 <button type="submit" class="back-btn" style="padding:10px 16px"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
             </form>
 
-            @php
+            <?php
                 $hasQuery = !empty($queryUsed ?? []);
-            @endphp
-            @if($hasQuery && ($bags ?? collect())->isEmpty())
-                <div class="hint">No baggage found for @if(isset($queryUsed['tag'])) tag <strong>{{ $queryUsed['tag'] }}</strong> @elseif(isset($queryUsed['email'])) email <strong>{{ $queryUsed['email'] }}</strong> @endif.</div>
-            @endif
+            ?>
+            <?php if($hasQuery && ($bags ?? collect())->isEmpty()): ?>
+                <div class="hint">No baggage found for <?php if(isset($queryUsed['tag'])): ?> tag <strong><?php echo e($queryUsed['tag']); ?></strong> <?php elseif(isset($queryUsed['email'])): ?> email <strong><?php echo e($queryUsed['email']); ?></strong> <?php endif; ?>.</div>
+            <?php endif; ?>
 
-            @if(!empty($flightUsed ?? ''))
-                @php
+            <?php if(!empty($flightUsed ?? '')): ?>
+                <?php
                     $flightBags = ($bags ?? collect());
                     $beltSet = $flightBags->pluck('current_location')->filter()->unique()->values();
-                @endphp
+                ?>
                 <div class="card" style="margin-top:6px;margin-bottom:14px">
-                    <div class="hint"><strong>Flight:</strong> {{ $flightUsed }} &nbsp; | &nbsp; <strong>Belts:</strong>
-                        @if($beltSet->isEmpty()) Not assigned yet @else {{ $beltSet->join(', ') }} @endif
-                        &nbsp; | &nbsp; <strong>Bags found:</strong> {{ $flightBags->count() }}
+                    <div class="hint"><strong>Flight:</strong> <?php echo e($flightUsed); ?> &nbsp; | &nbsp; <strong>Belts:</strong>
+                        <?php if($beltSet->isEmpty()): ?> Not assigned yet <?php else: ?> <?php echo e($beltSet->join(', ')); ?> <?php endif; ?>
+                        &nbsp; | &nbsp; <strong>Bags found:</strong> <?php echo e($flightBags->count()); ?>
+
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <table class="table">
                 <thead>
@@ -97,8 +98,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse(($bags ?? collect()) as $bag)
-                        @php
+                    <?php $__empty_1 = true; $__currentLoopData = ($bags ?? collect()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
                             $booking = $bag->booking;
                             $flight = $booking?->flight;
                             $route = $flight?->route;
@@ -113,25 +114,25 @@
                                 default => 'badge-amber'
                             };
                             $lastScan = optional($bag->trackingRecords->sortByDesc('scan_time')->first())->scan_time;
-                        @endphp
+                        ?>
                         <tr>
-                            <td>{{ $bag->baggage_tag }}</td>
-                            <td>{{ $name }}</td>
-                            <td>{{ $flight?->flight_number ?? '—' }}</td>
-                            <td>{{ $from }}</td>
-                            <td>{{ $to }}</td>
-                            <td><span class="badge {{ $badgeClass }}">{{ ucfirst($status) }}</span></td>
-                            <td>{{ $bag->current_location ?? '—' }}</td>
-                            <td>{{ $lastScan ? $lastScan->format('Y-m-d H:i') : '—' }}</td>
+                            <td><?php echo e($bag->baggage_tag); ?></td>
+                            <td><?php echo e($name); ?></td>
+                            <td><?php echo e($flight?->flight_number ?? '—'); ?></td>
+                            <td><?php echo e($from); ?></td>
+                            <td><?php echo e($to); ?></td>
+                            <td><span class="badge <?php echo e($badgeClass); ?>"><?php echo e(ucfirst($status)); ?></span></td>
+                            <td><?php echo e($bag->current_location ?? '—'); ?></td>
+                            <td><?php echo e($lastScan ? $lastScan->format('Y-m-d H:i') : '—'); ?></td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr><td colspan="8" class="hint">Use the search above to track your baggage.</td></tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </section>
 
-        @if(($arrivals ?? collect())->isNotEmpty())
+        <?php if(($arrivals ?? collect())->isNotEmpty()): ?>
             <section class="card">
                 <h2 class="section-title" style="margin-top:0">Recently Arrived Flights & Belts</h2>
                 <p class="hint">Quickly find which belt is serving a recent arrival without searching.</p>
@@ -147,26 +148,28 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($arrivals as $a)
+                        <?php $__currentLoopData = $arrivals; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $a): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td>{{ $a['flight_number'] }}</td>
-                                <td>{{ $a['date'] }}</td>
-                                <td>{{ $a['from'] ?? '—' }}</td>
-                                <td>{{ $a['to'] ?? '—' }}</td>
+                                <td><?php echo e($a['flight_number']); ?></td>
+                                <td><?php echo e($a['date']); ?></td>
+                                <td><?php echo e($a['from'] ?? '—'); ?></td>
+                                <td><?php echo e($a['to'] ?? '—'); ?></td>
                                 <td>
-                                    @if(($a['belts'] ?? collect())->isEmpty())
+                                    <?php if(($a['belts'] ?? collect())->isEmpty()): ?>
                                         <span class="badge badge-amber">TBD</span>
-                                    @else
-                                        {{ ($a['belts'])->join(', ') }}
-                                    @endif
+                                    <?php else: ?>
+                                        <?php echo e(($a['belts'])->join(', ')); ?>
+
+                                    <?php endif; ?>
                                 </td>
-                                <td>{{ $a['bags_count'] }}</td>
+                                <td><?php echo e($a['bags_count']); ?></td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </section>
-        @endif
+        <?php endif; ?>
     </main>
 </body>
 </html>
+<?php /**PATH C:\Users\HP\example-app\resources\views/baggage_track.blade.php ENDPATH**/ ?>
