@@ -12,17 +12,18 @@ class Route extends Model
     use HasFactory;
 
     protected $fillable = [
-        'departure_airport_id',
-        'arrival_airport_id',
+        // Align with migration columns
+        'origin_airport_id',
+        'destination_airport_id',
         'distance_km',
-        'estimated_duration',
-        'is_active',
+        'estimated_duration_minutes',
+        'active',
     ];
 
     protected $casts = [
         'distance_km' => 'integer',
-        'estimated_duration' => 'integer',
-        'is_active' => 'boolean',
+        'estimated_duration_minutes' => 'integer',
+        'active' => 'boolean',
     ];
 
     /**
@@ -30,7 +31,8 @@ class Route extends Model
      */
     public function departureAirport(): BelongsTo
     {
-        return $this->belongsTo(Airport::class, 'departure_airport_id');
+        // Backward-compatible alias to the actual FK used in schema
+        return $this->belongsTo(Airport::class, 'origin_airport_id');
     }
 
     /**
@@ -38,7 +40,8 @@ class Route extends Model
      */
     public function arrivalAirport(): BelongsTo
     {
-        return $this->belongsTo(Airport::class, 'arrival_airport_id');
+        // Backward-compatible alias to the actual FK used in schema
+        return $this->belongsTo(Airport::class, 'destination_airport_id');
     }
 
     /**
@@ -54,7 +57,7 @@ class Route extends Model
      */
     public function isActive(): bool
     {
-        return $this->is_active;
+        return (bool) ($this->active ?? false);
     }
 
     /**
@@ -78,8 +81,9 @@ class Route extends Model
      */
     public function getFormattedDurationAttribute(): string
     {
-        $hours = intval($this->estimated_duration / 60);
-        $minutes = $this->estimated_duration % 60;
+        $duration = $this->estimated_duration_minutes ?? 0;
+        $hours = intval($duration / 60);
+        $minutes = $duration % 60;
         
         if ($hours > 0) {
             return $minutes > 0 ? "{$hours}h {$minutes}m" : "{$hours}h";
@@ -154,5 +158,31 @@ class Route extends Model
             ->orderBy('flights_count', 'desc')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Accessor aliases for backward compatibility with previous attribute names
+     */
+    public function getEstimatedDurationAttribute(): ?int
+    {
+        return $this->estimated_duration_minutes;
+    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return (bool) ($this->active ?? false);
+    }
+
+    /**
+     * Optional explicit relations using schema names
+     */
+    public function originAirport(): BelongsTo
+    {
+        return $this->belongsTo(Airport::class, 'origin_airport_id');
+    }
+
+    public function destinationAirport(): BelongsTo
+    {
+        return $this->belongsTo(Airport::class, 'destination_airport_id');
     }
 }

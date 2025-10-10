@@ -50,78 +50,79 @@
                 </div>
             </div>
             <div>
-                <a class="link" href="{{ Route::has('home') ? route('home') : url('/') }}"><i class="fas fa-home"></i> Home</a>
+                <a class="link" href="<?php echo e(Route::has('home') ? route('home') : url('/')); ?>"><i class="fas fa-home"></i> Home</a>
             </div>
         </div>
 
-        @if ($errors->any())
+        <?php if($errors->any()): ?>
             <div class="errors">
                 <ul style="margin:0 0 0 1rem;">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
-        @endif
+        <?php endif; ?>
 
-        @if (session('success'))
-            <div class="success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
-        @endif
+        <?php if(session('success')): ?>
+            <div class="success"><i class="fas fa-check-circle"></i> <?php echo e(session('success')); ?></div>
+        <?php endif; ?>
 
-        <form method="POST" action="{{ route('checkin.store') }}">
-            @csrf
+        <form method="POST" action="<?php echo e(route('checkin.store')); ?>">
+            <?php echo csrf_field(); ?>
             <div class="row">
                 <div>
                     <label for="email">Booking Email</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required>
+                    <input id="email" name="email" type="email" value="<?php echo e(old('email')); ?>" required>
                 </div>
             </div>
             <div class="row">
                 <div>
                     <label for="check_in_method">Check-In Method</label>
                     <select id="check_in_method" name="check_in_method" required>
-                        <option value="online" {{ old('check_in_method')==='online'?'selected':'' }}>Online</option>
-                        <option value="mobile" {{ old('check_in_method')==='mobile'?'selected':'' }}>Mobile</option>
-                        <option value="kiosk" {{ old('check_in_method')==='kiosk'?'selected':'' }}>Kiosk</option>
-                        <option value="counter" {{ old('check_in_method')==='counter'?'selected':'' }}>Counter</option>
+                        <option value="online" <?php echo e(old('check_in_method')==='online'?'selected':''); ?>>Online</option>
+                        <option value="mobile" <?php echo e(old('check_in_method')==='mobile'?'selected':''); ?>>Mobile</option>
+                        <option value="kiosk" <?php echo e(old('check_in_method')==='kiosk'?'selected':''); ?>>Kiosk</option>
+                        <option value="counter" <?php echo e(old('check_in_method')==='counter'?'selected':''); ?>>Counter</option>
                     </select>
                 </div>
                 <div>
                     <label for="terminal_number">Terminal</label>
                     <select id="terminal_number" name="terminal_number" required>
-                        @for($t=1;$t<=5;$t++)
-                            <option value="{{ $t }}" {{ (old('terminal_number')==$t) || (!old('terminal_number') && request('terminal')==$t) ? 'selected' : '' }}>Terminal {{ $t }}</option>
-                        @endfor
+                        <?php for($t=1;$t<=5;$t++): ?>
+                            <option value="<?php echo e($t); ?>" <?php echo e((old('terminal_number')==$t) || (!old('terminal_number') && request('terminal')==$t) ? 'selected' : ''); ?>>Terminal <?php echo e($t); ?></option>
+                        <?php endfor; ?>
                     </select>
                 </div>
             </div>
             <div class="row">
                 <div>
                     <label for="seat_number">Preferred Seat</label>
-                    <input id="seat_number" name="seat_number" type="text" value="{{ old('seat_number') }}" placeholder="e.g., 12A">
+                    <input id="seat_number" name="seat_number" type="text" value="<?php echo e(old('seat_number')); ?>" placeholder="e.g., 12A">
                 </div>
                 <div>
                     <label>
-                        <input type="checkbox" name="priority_boarding" value="1" {{ old('priority_boarding')?'checked':'' }}>
+                        <input type="checkbox" name="priority_boarding" value="1" <?php echo e(old('priority_boarding')?'checked':''); ?>>
                         Priority boarding
                     </label>
                 </div>
             </div>
             <label for="special_assistance">Special Assistance (optional)</label>
-            <textarea id="special_assistance" name="special_assistance" placeholder="Wheelchair, medical, etc.">{{ old('special_assistance') }}</textarea>
+            <textarea id="special_assistance" name="special_assistance" placeholder="Wheelchair, medical, etc."><?php echo e(old('special_assistance')); ?></textarea>
 
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:.8rem">
-                <a class="btn" href="{{ route('checkin.create') }}"><i class="fas fa-rotate"></i> Reset</a>
+                <a class="btn" href="<?php echo e(route('checkin.create')); ?>"><i class="fas fa-rotate"></i> Reset</a>
                 <button type="submit" class="btn"><i class="fas fa-paper-plane"></i> Check-In</button>
             </div>
         </form>
 
-        @if(session('bp'))
+        <?php if(session('bp')): ?>
             <div class="success" style="margin-top:12px">
-                <i class="fas fa-ticket"></i> Boarding Pass: <strong>{{ session('bp') }}</strong>
+                <i class="fas fa-ticket"></i> Boarding Pass: <strong><?php echo e(session('bp')); ?></strong>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 </body>
 </html>
+<?php /**PATH C:\Users\HP\example-app\resources\views/checkin.blade.php ENDPATH**/ ?>

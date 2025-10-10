@@ -959,7 +959,7 @@
                 <h3>Check-In</h3>
                 <p>Complete online check-in and get your digital boarding pass instantly</p>
 
-            </div>
+            </a>
             <a href="{{ route('flight_status') }}" class="action-card" style="text-decoration:none;color:inherit">
 
                 <div class="action-icon"><i class="fas fa-chart-line"></i></div>

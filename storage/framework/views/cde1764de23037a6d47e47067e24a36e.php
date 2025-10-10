@@ -414,6 +414,46 @@
         </div>
     </div>
 
+    <div class="container">
+        <!-- Recent Check-Ins -->
+        <section class="card" style="margin-top:1.2rem;">
+            <h2><i class="fas fa-id-card"></i> Recent Check-Ins</h2>
+            <?php $checkins = $checkins ?? collect(); ?>
+            <?php if($checkins->count()): ?>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Boarding Pass</th>
+                                <th>Method</th>
+                                <th>Terminal</th>
+                                <th>Gate</th>
+                                <th>Boarding</th>
+                                <th>Status</th>
+                                <th>Checked At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php $__currentLoopData = $checkins; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ci): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr>
+                                <td><?php echo e($ci->boarding_pass_number); ?></td>
+                                <td><?php echo e(ucfirst($ci->check_in_method)); ?></td>
+                                <td>Terminal <?php echo e($ci->terminal_number ?? '-'); ?></td>
+                                <td><?php echo e($ci->gate ?? '-'); ?></td>
+                                <td><?php echo e($ci->boarding_time ?? '-'); ?></td>
+                                <td><span class="tag"><?php echo e(ucfirst($ci->status)); ?></span></td>
+                                <td><?php echo e(optional($ci->check_in_time)->format('Y-m-d H:i')); ?></td>
+                            </tr>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <p class="muted"><i class="fas fa-circle-info"></i> No check-ins yet.</p>
+            <?php endif; ?>
+        </section>
+    </div>
+
     <div class="container" style="padding-top:0;">
         <!-- Contact Messages -->
         <section class="card" style="margin-top:1.2rem;">

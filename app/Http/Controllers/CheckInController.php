@@ -18,7 +18,6 @@ class CheckInController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'booking_reference' => ['required','string','max:32'],
             'email' => ['required','email'],
             'check_in_method' => ['required','in:online,mobile,kiosk,counter'],
             'terminal_number' => ['required','integer','min:1','max:5'],
@@ -27,13 +26,16 @@ class CheckInController extends Controller
             'special_assistance' => ['nullable','string','max:1000'],
         ]);
 
-        $booking = Booking::where('booking_reference', strtoupper($data['booking_reference']))
+        // Find the most recent eligible booking for this email
+        $booking = Booking::query()
             ->where('booked_by_email', $data['email'])
+            ->whereIn('booking_status', ['confirmed','pending'])
+            ->orderByDesc('id')
             ->with('flight')
             ->first();
 
         if (!$booking) {
-            return back()->withErrors(['booking_reference' => 'Booking not found for the provided reference and email.'])->withInput();
+            return back()->withErrors(['email' => 'No active booking found for this email.'])->withInput();
         }
 
         // Prevent duplicate check-in
