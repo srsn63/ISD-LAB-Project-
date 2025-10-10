@@ -20,6 +20,8 @@ Route::get('/', function () {
 
 // Flight Status page (dummy data, themed)
 Route::view('/flight-status', 'flight_status')->name('flight_status');
+// Baggage Track page (dummy data, themed)
+Route::view('/baggage-track', 'baggage_track')->name('baggage_track');
 
 // Static pages from footer quick links
 Route::view('/about', 'pages.about')->name('about');
