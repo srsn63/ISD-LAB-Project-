@@ -16,6 +16,9 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Flight Status page (dummy data, themed)
+Route::view('/flight-status', 'flight_status')->name('flight_status');
+
 // Static pages from footer quick links
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/careers', 'pages.careers')->name('careers');

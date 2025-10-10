@@ -959,11 +959,11 @@
                 <h3>Check-In</h3>
                 <p>Complete online check-in and get your digital boarding pass instantly</p>
             </div>
-            <div class="action-card">
+            <a href="{{ route('flight_status') }}" class="action-card" style="text-decoration:none;color:inherit">
                 <div class="action-icon"><i class="fas fa-chart-line"></i></div>
                 <h3>Flight Status</h3>
                 <p>Track real-time flight information, gate updates and arrival times</p>
-            </div>
+            </a>
             <div class="action-card">
                 <div class="action-icon"><i class="fas fa-suitcase-rolling"></i></div>
                 <h3>Baggage Track</h3>
