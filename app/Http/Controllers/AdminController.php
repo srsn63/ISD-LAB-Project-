@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\ContactMessage;
+use App\Models\CheckIn;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -28,6 +29,12 @@ class AdminController extends Controller
             ->limit(20)
             ->get();
 
-        return view('admin', compact('users', 'bookings', 'messages'));
+        // Recent check-ins
+        $checkins = CheckIn::query()
+            ->orderByDesc('id')
+            ->limit(20)
+            ->get();
+
+        return view('admin', compact('users', 'bookings', 'messages', 'checkins'));
     }
 }

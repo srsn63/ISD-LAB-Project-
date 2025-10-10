@@ -8,6 +8,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\FlightController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CheckInController;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\ContactMessage;
@@ -154,3 +155,7 @@ Route::post('/bookings', function(Request $request){
 
     return back()->with('status', $result['msg']);
 })->name('bookings.store');
+
+// Check-In routes
+Route::get('/check-in', [CheckInController::class, 'create'])->name('checkin.create');
+Route::post('/check-in', [CheckInController::class, 'store'])->name('checkin.store');

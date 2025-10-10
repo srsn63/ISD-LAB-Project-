@@ -13,16 +13,21 @@ class CheckIn extends Model
     protected $fillable = [
         'booking_id',
         'check_in_time',
+        'check_in_method',
         'boarding_pass_number',
-        'gate_number',
         'seat_number',
-        'baggage_tags',
+        'gate',
+        'boarding_time',
+        'priority_boarding',
+        'status',
         'special_assistance',
+        'terminal_number',
     ];
 
     protected $casts = [
         'check_in_time' => 'datetime',
-        'baggage_tags' => 'array',
+        'boarding_time' => 'datetime:H:i',
+        'priority_boarding' => 'boolean',
     ];
 
     /**

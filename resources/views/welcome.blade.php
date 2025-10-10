@@ -949,21 +949,21 @@
     <section class="quick-actions">
         <h2 class="section-title">Quick Actions</h2>
         <div class="actions-grid">
-            <div class="action-card">
+            <a class="action-card" href="{{ route('flights.index') }}" style="text-decoration:none;color:inherit">
                 <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
                 <h3>Book Flight</h3>
                 <p>Find and book your perfect flight with our easy booking system and exclusive deals</p>
-            </div>
-            <div class="action-card">
+            </a>
+            <a class="action-card" href="{{ route('checkin.create') }}" style="text-decoration:none;color:inherit" id="quickCheckInCard" data-terminals="5">
                 <div class="action-icon"><i class="fas fa-check-circle"></i></div>
                 <h3>Check-In</h3>
                 <p>Complete online check-in and get your digital boarding pass instantly</p>
-            </div>
-            <div class="action-card">
+            </a>
+            <a class="action-card" href="{{ route('status') }}" style="text-decoration:none;color:inherit">
                 <div class="action-icon"><i class="fas fa-chart-line"></i></div>
                 <h3>Flight Status</h3>
                 <p>Track real-time flight information, gate updates and arrival times</p>
-            </div>
+            </a>
             <div class="action-card">
                 <div class="action-icon"><i class="fas fa-suitcase-rolling"></i></div>
                 <h3>Baggage Track</h3>
@@ -1128,13 +1128,29 @@
 
         // Action cards click animation
         document.querySelectorAll('.action-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function(e) {
                 this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 200);
+                setTimeout(() => { this.style.transform = ''; }, 200);
             });
         });
+
+        // Assign a rotating terminal (1..5) when using the quick Check-In card
+        const quickCheckInCard = document.getElementById('quickCheckInCard');
+        if (quickCheckInCard) {
+            quickCheckInCard.addEventListener('click', function(e) {
+                // Compute terminal and rewrite href just before navigation
+                let last = Number(localStorage.getItem('lalon_last_terminal')) || 0;
+                const max = Number(quickCheckInCard.getAttribute('data-terminals')) || 5;
+                const next = (last % max) + 1;
+                localStorage.setItem('lalon_last_terminal', String(next));
+
+                try {
+                    const url = new URL(quickCheckInCard.href, window.location.origin);
+                    url.searchParams.set('terminal', String(next));
+                    quickCheckInCard.setAttribute('href', url.toString());
+                } catch (_) { /* noop */ }
+            }, { once: true });
+        }
 
         // Number counter animation
         const counters = document.querySelectorAll('.stat-number');
