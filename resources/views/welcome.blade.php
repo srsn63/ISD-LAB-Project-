@@ -930,7 +930,7 @@
                     </div>
                     <div class="form-group">
                         <label><i class="far fa-calendar-alt"></i> Departure Date</label>
-                        <input type="date" name="date" required>
+                        <input type="date" name="date">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-user-friends"></i> Class</label>
@@ -949,11 +949,6 @@
     <section class="quick-actions">
         <h2 class="section-title">Quick Actions</h2>
         <div class="actions-grid">
-            <a class="action-card" href="{{ route('flights.index') }}" style="text-decoration:none;color:inherit">
-                <div class="action-icon"><i class="fas fa-ticket-alt"></i></div>
-                <h3>Book Flight</h3>
-                <p>Find and book your perfect flight with our easy booking system and exclusive deals</p>
-            </a>
             <a class="action-card" href="{{ route('checkin.create') }}" style="text-decoration:none;color:inherit" id="quickCheckInCard" data-terminals="5">
                 <div class="action-icon"><i class="fas fa-check-circle"></i></div>
                 <h3>Check-In</h3>
