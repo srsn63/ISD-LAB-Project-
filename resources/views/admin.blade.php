@@ -412,6 +412,46 @@
         </div>
     </div>
 
+    <div class="container">
+        <!-- Recent Check-Ins -->
+        <section class="card" style="margin-top:1.2rem;">
+            <h2><i class="fas fa-id-card"></i> Recent Check-Ins</h2>
+            @php $checkins = $checkins ?? collect(); @endphp
+            @if($checkins->count())
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Boarding Pass</th>
+                                <th>Method</th>
+                                <th>Terminal</th>
+                                <th>Gate</th>
+                                <th>Boarding</th>
+                                <th>Status</th>
+                                <th>Checked At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach($checkins as $ci)
+                            <tr>
+                                <td>{{ $ci->boarding_pass_number }}</td>
+                                <td>{{ ucfirst($ci->check_in_method) }}</td>
+                                <td>Terminal {{ $ci->terminal_number ?? '-' }}</td>
+                                <td>{{ $ci->gate ?? '-' }}</td>
+                                <td>{{ $ci->boarding_time ?? '-' }}</td>
+                                <td><span class="tag">{{ ucfirst($ci->status) }}</span></td>
+                                <td>{{ optional($ci->check_in_time)->format('Y-m-d H:i') }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="muted"><i class="fas fa-circle-info"></i> No check-ins yet.</p>
+            @endif
+        </section>
+    </div>
+
     <div class="container" style="padding-top:0;">
         <!-- Contact Messages -->
         <section class="card" style="margin-top:1.2rem;">
